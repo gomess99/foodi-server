@@ -4,6 +4,7 @@ const cors = require("cors");
 const port = process.env.PORT || 6001;
 require("dotenv").config();
 
+
 // middleware
 app.use(cors());
 app.use(express.json());
@@ -29,6 +30,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
+    console.log("Connected to MongoDB successfully!");
 
     // database & collections
     const menuCollections = client.db("demo-foodi-client").collection("menus")
@@ -45,17 +47,19 @@ async function run() {
     // all carts operations
 
 
-    //posting cart  to db
+    //posting cart to db
     app.post('/carts', async(req, res) =>{
-        const carteItem = req.body;
-        const result = await cartCollections.insertOne(carteItem);
-        req.send(result)
+        const cartItem = req.body;
+        const result = await cartCollections.insertOne(cartItem);
+        res.send(result)
     })
 
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
+  }catch (error){
+    console.error("Failed to connect to MongoDB:", error);
   } finally {
     // Ensures that the client will close when you finish/error
     //await client.close();
