@@ -15,7 +15,7 @@ app.get("/", (req, res) => {
 
 // mongodb config
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@demo-foodi-cluster.xrmfk.mongodb.net/?retryWrites=true&w=majority&appName=demo-foodi-cluster`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -42,7 +42,7 @@ async function run() {
         const result = await menuCollections.find().toArray();
         res.send(result)
 
-    })
+    }) 
 
     // all carts operations
 
@@ -53,6 +53,32 @@ async function run() {
         const result = await cartCollections.insertOne(cartItem);
         res.send(result)
     })
+
+    // getcarts using email
+
+    app.get('/carts', async(req, res) =>{
+        const email = req.query.email;
+        const filter = {email: email}
+        const result = await cartCollections.find(filter).toArray();
+        res.send(result) 
+    })
+
+    // get specific carts
+    app.get('/carts/:id', async(req, res)=>{
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const result = await cartCollections.findOne(filter);
+        res.send(result)
+    })
+
+    // delete item from cart
+    app.delete('/carts/:id', async (req, res) => {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const result = await cartCollections.deleteOne(filter);
+        res.send(result);
+    });
+    
 
     await client.db("admin").command({ ping: 1 });
     console.log(
